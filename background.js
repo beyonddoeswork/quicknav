@@ -1,5 +1,5 @@
  
-Worrking on manifest v3 - remember
+// Worrking on manifest v3 - remember
  
 
 // Built-in platform map (aliases + optional search URL) pre-loaded for user to use.
