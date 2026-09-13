@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "QuickNav Smart Shortcuts",
+  "version": "2.2",
+  "description": "Smart, natural language custom navigation across all your favorite tools, with typo-tolerant matching and one-word morning routines.",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "omnibox": {
+    "keyword": "go"
+  },
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "options_page": "popup.html",
+  "action": {
+    "default_title": "QuickNav Settings",
+    "default_popup": "popup.html"
+  }
+}

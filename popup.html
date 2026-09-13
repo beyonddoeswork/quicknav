@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>QuickNav</title>
+<style>
+  :root {
+    --bg: #0F1115;
+    --panel: #171A21;
+    --panel-raised: #1D2128;
+    --border: #262B35;
+    --text: #E8EAED;
+    --muted: #8A93A6;
+    --accent: #5EEAD4;
+    --accent-dim: #2C6B63;
+    --danger: #F87171;
+    --danger-dim: #4A2626;
+    --warn: #FBBF24;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    background: var(--bg);
+    min-height: 100vh;
+  }
+
+  body {
+    margin: 0 auto;
+    width: 360px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+  }
+
+  header {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header .brand {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin: 0 0 2px;
+  }
+
+  header .tagline {
+    margin: 0;
+    color: var(--muted);
+    font-size: 11.5px;
+  }
+
+  nav.tabs {
+    display: flex;
+    gap: 2px;
+    padding: 8px 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  nav.tabs button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 9px 6px 10px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color .15s ease, border-color .15s ease;
+  }
+
+  nav.tabs button:hover { color: var(--text); }
+
+  nav.tabs button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  main {
+    padding: 14px 16px 16px;
+    max-height: 460px;
+    overflow-y: auto;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .card h3 {
+    margin: 0 0 10px;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  label {
+    display: block;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    margin-top: 8px;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input[type="text"] {
+    width: 100%;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 8px 9px;
+    font-size: 12.5px;
+    font-family: var(--mono);
+    outline: none;
+  }
+
+  input[type="text"]:focus { border-color: var(--accent); }
+  input[type="text"]::placeholder { color: #545c6d; }
+
+  .hint {
+    font-size: 10.5px;
+    color: #5c6577;
+    margin-top: 4px;
+    font-family: var(--sans);
+  }
+
+  .btn {
+    border: none;
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: filter .12s ease;
+  }
+  .btn:hover { filter: brightness(1.1); }
+
+  .btn-primary { background: var(--accent); color: #06231F; width: 100%; margin-top: 10px; }
+  .btn-danger { background: var(--danger-dim); color: var(--danger); padding: 5px 9px; font-size: 11px; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 5px 9px; font-size: 11px; }
+  .btn-ghost:hover { color: var(--text); }
+
+  .shortcut-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+
+  .prompt-chip {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .prompt-chip .arrow { color: #545c6d; }
+
+  .shortcut-meta { flex: 1; overflow: hidden; margin-left: 8px; }
+  .shortcut-url { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  .shortcut-aliases { font-size: 10px; color: #5c6577; margin-top: 1px; }
+
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11.5px;
+    padding: 14px 8px;
+  }
+
+  .routine-select-row { display: flex; gap: 6px; align-items: center; }
+  select {
+    flex: 1;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 7px 8px;
+    font-size: 12px;
+    font-family: var(--sans);
+  }
+
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+
+  .step-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #06231F;
+    background: var(--accent);
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  .step-url { flex: 1; font-family: var(--mono); font-size: 11px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .step-actions { display: flex; gap: 3px; flex-shrink: 0; }
+  .step-actions button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 5px;
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .step-actions button:hover { color: var(--text); border-color: var(--muted); }
+
+  .add-url-row { display: flex; gap: 6px; margin-top: 8px; }
+  .add-url-row input { flex: 1; }
+  .add-url-row button { flex-shrink: 0; }
+
+  .routine-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .routine-title-input { font-family: var(--sans); font-weight: 700; font-size: 13px; border: none; background: transparent; color: var(--text); padding: 0; }
+  .routine-title-input:focus { outline: none; }
+
+  footer {
+    padding: 8px 16px 12px;
+    border-top: 1px solid var(--border);
+    font-size: 10.5px;
+    color: #5c6577;
+    text-align: center;
+  }
+  footer code { font-family: var(--mono); color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="brand">QuickNav</p>
+  <p class="tagline">Type <code style="font-family: var(--mono); color: var(--accent);">go</code> in the address bar, then talk naturally.</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="shortcuts">Shortcuts</button>
+  <button class="tab-btn" data-tab="routines">Routines</button>
+</nav>
+
+<main>
+  <!-- SHORTCUTS PANEL -->
+  <section class="panel active" id="panel-shortcuts">
+    <div class="card">
+      <h3>New shortcut</h3>
+      <label for="keyword">Keyword</label>
+      <input type="text" id="keyword" placeholder="e.g. reddit">
+
+      <label for="url">Opens this URL</label>
+      <input type="text" id="url" placeholder="https://example.com">
+
+      <label for="searchUrl">Search URL <span style="opacity:.6">(optional)</span></label>
+      <input type="text" id="searchUrl" placeholder="https://example.com/search?q=">
+
+      <label for="aliases">Also recognize <span style="opacity:.6">(optional, comma separated)</span></label>
+      <input type="text" id="aliases" placeholder="e.g. sub, thread">
+      <div class="hint">QuickNav already tolerates small typos on any keyword or alias — no need to list misspellings here.</div>
+
+      <button class="btn btn-primary" id="save-btn">Add shortcut</button>
+    </div>
+
+    <div class="card">
+      <h3>Your shortcuts</h3>
+      <div id="shortcut-list"></div>
+    </div>
+  </section>
+
+  <!-- ROUTINES PANEL -->
+  <section class="panel" id="panel-routines">
+    <div class="card">
+      <h3>Routine</h3>
+      <div class="routine-select-row">
+        <select id="routine-select"></select>
+        <button class="btn btn-ghost" id="new-routine-btn">+ New</button>
+      </div>
+    </div>
+
+    <div class="card" id="routine-editor-card">
+      <div class="routine-header-row">
+        <input type="text" class="routine-title-input" id="routine-label" placeholder="Routine name">
+        <button class="btn btn-danger" id="delete-routine-btn">Delete</button>
+      </div>
+      <div id="routine-steps"></div>
+      <div class="add-url-row">
+        <input type="text" id="new-step-url" placeholder="https://... to add as next tab">
+        <button class="btn btn-ghost" id="add-step-btn">Add</button>
+      </div>
+      <div class="hint">Type just the routine's name (e.g. <code style="font-family:var(--mono)">morning</code>) in the address bar to open every tab below, in order.</div>
+      <button class="btn btn-primary" id="save-routine-btn">Save routine</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Typos are auto-corrected · unmatched keywords fall back to Google
+</footer>
+
+<script src="popup.js"></script>
+</body>
+</html>
+
